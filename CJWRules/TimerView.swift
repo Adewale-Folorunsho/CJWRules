@@ -6,7 +6,7 @@ struct TimerView: View {
     @AppStorage("word2") private var originalWord2: String = "intelligent"
     @AppStorage("word3") private var originalWord3: String = "beautiful"
     @AppStorage("word4") private var originalWord4: String = "breathtaking"
-    @AppStorage("lastUpdateMinute") private var lastSynonymUpdateMinute = 0
+    @AppStorage("lastUpdateMinute") private var lastSynonymUpdateMinute = -1
     @AppStorage("isUpdating") private var isUpdating = false
     
     // Add these state variables at the top of your TimerView struct
@@ -18,28 +18,32 @@ struct TimerView: View {
     
     
     // Fixed lists of synonyms for each word
+    // First position adjectives (should work after "the")
     private let synonyms1 = [
-        "fierce", "strong", "powerful", "brave", "bold",
-        "courageous", "determined", "fearless", "mighty", "valiant",
-        "tough", "spirited", "passionate", "intense", "daring"
+        "sweet", "kind", "lovely", "cute", "adorable", "funny",
+        "smart", "cool", "pretty", "sexy", "fierce",
+        "homely", "caring", "loving", "amazing"
     ]
     
+    // Second position adjectives (no "the" before)
     private let synonyms2 = [
-        "intelligent", "smart", "brilliant", "wise", "clever",
-        "sharp", "bright", "intellectual", "astute", "insightful",
-        "perceptive", "ingenious", "knowledgeable", "thoughtful", "genius"
+        "beautiful", "incredible", "wonderful", "gorgeous", "perfect",
+        "talented", "brilliant", "thoughtful", "charming", "adorable",
+        "special", "fantastic", "awesome", "stunning", "loving"
     ]
     
+    // Third position adjectives (no "the" before)
     private let synonyms3 = [
-        "beautiful", "gorgeous", "stunning", "lovely", "pretty",
-        "attractive", "exquisite", "elegant", "radiant", "alluring",
-        "charming", "dazzling", "glowing", "captivating", "enchanting"
+        "hilarious", "intelligent", "creative", "sweet", "honest",
+        "fun", "caring", "gentle", "passionate", "smart",
+        "funny", "clever", "kind", "exciting", "understanding"
     ]
     
+    // Fourth position adjectives (should work after "the")
     private let synonyms4 = [
-        "breathtaking", "amazing", "incredible", "spectacular", "stunning",
-        "wonderful", "astonishing", "magnificent", "extraordinary", "remarkable",
-        "awe-inspiring", "impressive", "jaw-dropping", "striking", "marvelous"
+        "most amazing", "most beautiful", "most wonderful", "most perfect",
+        "most incredible", "most adorable", "best", "most special", "most awesome",
+        "most gorgeous", "most loving", "most talented", "most brilliant", "most fantastic"
     ]
     
     private let initialDate: Date = {
@@ -94,7 +98,7 @@ struct TimerView: View {
                 }
                 
                 // Combined text with inline animation
-                Text("of being with the most \(originalWord1), \(originalWord2), \(originalWord3), and \(originalWord4) woman in the world!")
+                Text("of being with the most \(originalWord1), \(originalWord2), \(originalWord3), and the \(originalWord4) woman in the world!")
                     .font(.system(size: 20, weight: .semibold))
                     .foregroundColor(primaryPurple)
                     .multilineTextAlignment(.center)
@@ -154,14 +158,13 @@ struct TimerView: View {
         .onReceive(timer) { _ in
             self.currentTime = Date()
             let currentMinute = Calendar.current.component(.minute, from: currentTime)
-            if currentMinute != lastSynonymUpdateMinute {
+            if currentMinute != lastSynonymUpdateMinute && lastSynonymUpdateMinute >= 0 {
                 lastSynonymUpdateMinute = currentMinute
                 updateWordsWithAnimation()
-//                originalWord1 = synonyms1.randomElement() ?? "Loading..."
-//                originalWord2 = synonyms2.randomElement() ?? "Loading..."
-//                originalWord3 = synonyms3.randomElement() ?? "Loading..."
-//                originalWord4 = synonyms4.randomElement() ?? "Loading..."
-                
+            }
+            
+            if lastSynonymUpdateMinute < 0 {
+                lastSynonymUpdateMinute = 0
             }
         }
     }
@@ -256,8 +259,8 @@ struct TimeComponent: View {
                 .lineLimit(1)
             
             Text(unit)
-                .font(.system(size: 16))
-                .foregroundColor(Color.secondary)
+                .font(.system(size: 16, weight: .semibold)) // Added weight
+                .foregroundColor(color.opacity(0.7)) // Use the same color as the value, but with opacity
         }
         .frame(maxWidth: .infinity, minHeight: 100)
         .padding(.vertical, 10)
